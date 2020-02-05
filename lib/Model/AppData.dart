@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+//唯一标识符
+import 'package:uuid/uuid.dart';
 
-class AppStateProvider with ChangeNotifier{
+class AppStateProvider with ChangeNotifier {
   String localLang;
   Place myLocate;
   ContentData content;
+  String uuid;
+  Situations curSitu = Situations();
 
-  changeContent(ContentData data){
+  changeContent(ContentData data) {
     content = data;
     notifyListeners();
   }
 
   changeLang(String local) => localLang = local;
   changeLocal(Place locate) => myLocate = locate;
+  changeSitu(Situations cur){
+    curSitu = cur;
+    notifyListeners();
+  }
+
+  List<Place> getAllPlaces(){
+    List<Place> places = List();
+    for (Situations situ in content.situations) {
+      for (Place place in situ.places) {
+        places.add(place);
+      }
+    }
+    return places;
+  }
 }
 
 class ContentData {
@@ -47,20 +66,22 @@ class News {
 
 class Situations {
   int id;
-  String type;
-  String typeColor;
-  String title;
-  String level;
-  String levelColor;
-  String startTime;
-  String endTime;
-  String detail;
-  int distance;
-  String url;
-  String source;
-  String createAt;
-  String updateAt;
-  List<Place> places;
+  String type = '';
+  String typeColor = '#FFFFFF';
+  String title ='';
+  String level = '';
+  String levelColor = '#FFFFFF';
+  String startTime = '';
+  String endTime = '';
+  String detail = '';
+  int distance = 0;
+  String url = '';
+  String source = '';
+  String createAt = '';
+  String updateAt = '';
+  List<Place> places = List();
+
+  Situations();
 
   Situations.fromJson(Map<String, dynamic> json)
       : id = json['id'],
@@ -91,7 +112,7 @@ class Place {
   double lng;
   double lat;
 
-  Place({this.name,this.lng,this.lat});
+  Place({this.name, this.lng, this.lat});
 
   Place.fromJson(Map<String, dynamic> json)
       : name = json['name'],
@@ -103,4 +124,42 @@ class Place {
       return Place.fromJson(list[idx]);
     });
   }
+}
+
+class User {
+  String uuid;
+
+  factory User() => _getInstance();
+  static User get instance => _getInstance();
+  static User _instance;
+  User._internal();
+  static User _getInstance() {
+    if (_instance == null) {
+      _instance = User._internal();
+    }
+    return _instance;
+  }
+
+  Future getUUID() async {
+    SharedPreferences shared = await SharedPreferences.getInstance();
+    uuid = shared.get('UUID');
+    if (uuid == null) {
+      uuid = Uuid().v1();
+      shared.setString('UUID', uuid);
+    }
+    print(uuid);
+  }
+}
+
+class HexColor extends Color {
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll("#", "");
+    hexColor = hexColor.replaceAll('0X', '');
+    if (hexColor.length == 6) {
+      hexColor = "FF" + hexColor;
+    }
+    return int.parse(hexColor, radix: 16);
+  }
+
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }

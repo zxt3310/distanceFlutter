@@ -1,4 +1,4 @@
-import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +7,9 @@ import 'package:distance_flutter/MainView/focus.dart';
 import 'package:distance_flutter/MainView/distance.dart';
 import 'package:distance_flutter/Model/AppData.dart';
 import 'package:provider/provider.dart';
+
+String focusUrl = 'https://distance.xiaomap.cn/api/?do=follow';
+String aboutUrl = 'https://distance.xiaomap.cn/api/?do=about';
 
 const List barList = ["距离", "地图", "关注", "关于"];
 const List iconListUnselect = [
@@ -35,6 +38,7 @@ void main() {
 }
 
 void realRunApp() async {
+  await User.instance.getUUID();
   runApp(MyApp());
 }
 
@@ -83,27 +87,14 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('距離'),
-        actions: <Widget>[
-          Container(child:Text('当前语言：${state.localLang}          '))
-        ],
       ),
-      // body: PageView(
-      //   physics: NeverScrollableScrollPhysics(),
-      //   children: <Widget>[
-      //     MainPage(),
-      //     DisMapWidget(),
-      //     Container(color: Colors.grey[300]),
-      //     Container(color: Colors.white),
-      //   ],
-      //   controller: controller,
-      // ),
       body: IndexedStack(
         index: curidx,
         children: <Widget>[
           MainPage(),
           DisMapWidget(),
-          Container(color: Colors.grey[300]),
-          Container(color: Colors.white),
+          WebPage(url: focusUrl),
+          WebPage(url: aboutUrl)
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(

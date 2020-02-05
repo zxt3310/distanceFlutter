@@ -2,7 +2,7 @@
 import 'package:dio/dio.dart';
 export 'package:dio/dio.dart';
 
-const baseurl = 'http://api.distance.xiaomap.cn';
+const baseurl = 'https://distance.xiaomap.cn';
 
 class NetManager {
   Dio dio;

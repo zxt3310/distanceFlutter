@@ -67,7 +67,7 @@ class _MainPageState extends State<MainPage>
     NetManager manager = NetManager.instance;
     AppStateProvider appStateProvider = Provider.of<AppStateProvider>(context);
     return manager.dio.get(
-        '/api/?do=list2&lng=${appStateProvider.myLocate.lng}&lat=${appStateProvider.myLocate.lat}');
+        '/api/?do=list2&lng=${appStateProvider.myLocate.lng}&lat=${appStateProvider.myLocate.lat}&uid=${User.instance.uuid}');
   }
 
   Widget _getFutrueWidget() {
@@ -77,6 +77,10 @@ class _MainPageState extends State<MainPage>
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           Response response = snapshot.data;
+
+          if (response == null) {
+            return Container(child: Center(child: Text('网络连接错误')));
+          }
           Map res = json.decode(response.data);
           if (res['err'] != 0) {
             return Container(child: Center(child: Text(res['errmsg'])));
@@ -104,33 +108,9 @@ class _MainPageState extends State<MainPage>
               itemBuilder: (BuildContext ctx, idx) {
                 if (idx == 0) {
                   return GestureDetector(
-                      child: Image.network(news.imageSrc),
-                      // child: Container(
-                      //     padding: EdgeInsets.all(20),
-                      //     child: Column(children: [
-                      //       Row(
-                      //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      //         children: <Widget>[
-                      //           Expanded(
-                      //               child: Container(
-                      //             child: Column(
-                      //               crossAxisAlignment:
-                      //                   CrossAxisAlignment.start,
-                      //               mainAxisAlignment:
-                      //                   MainAxisAlignment.spaceAround,
-                      //               children: <Widget>[
-                      //                 Text('总患病人数',
-                      //                     style: TextStyle(fontSize: 14)),
-                      //                 Text('8000人',
-                      //                     style: TextStyle(fontSize: 30)),
-                      //               ],
-                      //             ),
-                      //           )),
-                      //           Icon(Icons.chevron_right)
-                      //         ],
-                      //       ),
-                      //       Container(height: 1, color: Colors.grey[400])
-                      //     ])),
+                      child: (news == null || news.imageSrc == null)
+                          ? SizedBox(height: 0)
+                          : Image.network(news.imageSrc),
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) => WebPage(url: news.url)));
@@ -159,13 +139,20 @@ class _MainPageState extends State<MainPage>
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              '${situation.title}   ${situation.type}',
-                                              style: TextStyle(fontSize: 16),
-                                            ),
+                                            Text.rich(TextSpan(
+                                                text: '${situation.title}   ',
+                                                children: [
+                                                  TextSpan(
+                                                      text:
+                                                          '#${situation.type}',
+                                                      style: TextStyle(
+                                                          color: HexColor(
+                                                              situation
+                                                                  .typeColor)))
+                                                ])),
                                             Container(
                                               padding: EdgeInsets.fromLTRB(
-                                                  15, 2, 5, 2),
+                                                  5, 2, 5, 2),
                                               decoration: BoxDecoration(
                                                   borderRadius:
                                                       BorderRadius.circular(5),
@@ -177,7 +164,9 @@ class _MainPageState extends State<MainPage>
                                                       fontSize: 12)),
                                             )
                                           ]),
-                                      Text(situation.detail, maxLines: 2),
+                                      Text(situation.detail,
+                                          style: TextStyle(fontSize: 16),
+                                          maxLines: 3),
                                       Row(
                                           children:
                                               _placesList(situation.places))
@@ -200,20 +189,7 @@ class _MainPageState extends State<MainPage>
 List<Widget> _placesList(List<Place> places) {
   return List<Widget>.generate(places.length, (idx) {
     return Container(
-      padding: EdgeInsets.fromLTRB(0, 2, 5, 2),
-      child: Text('${places[idx].name}'));
+        padding: EdgeInsets.fromLTRB(0, 2, 5, 2),
+        child: Text('${places[idx].name}'));
   });
-}
-
-class HexColor extends Color {
-  static int _getColorFromHex(String hexColor) {
-    hexColor = hexColor.toUpperCase().replaceAll("#", "");
-    hexColor = hexColor.replaceAll('0X', '');
-    if (hexColor.length == 6) {
-      hexColor = "FF" + hexColor;
-    }
-    return int.parse(hexColor, radix: 16);
-  }
-
-  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }

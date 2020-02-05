@@ -23,15 +23,24 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
+  # 屏幕适配
   flutter_screenutil:
+  # 状态共享
   provider:
+  # 数据共享
   shared_preferences:
+  # 网络请求
   dio:
+  # 网页植入
   webview_flutter:
   # 定位插件
   location:
+  # 定位权限
   location_permissions:
+  # 地图插件
   flutter_map:
+  # uuid
+  uuid: ^2.0.4
 dev_dependencies:
   flutter_test:
     sdk: flutter
